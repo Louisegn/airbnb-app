@@ -10,6 +10,14 @@ import SignInScreen from "./containers/SignInScreen";
 import SignUpScreen from "./containers/SignUpScreen";
 import SettingsScreen from "./containers/SettingsScreen";
 import SplashScreen from "./containers/SplashScreen";
+import RoomScreen from "./containers/RoomScreen";
+// import { useNavigation } from "@react-navigation/native";
+
+//
+import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { StyleSheet, Image } from "react-native";
+import AroundMeScreen from "./containers/AroundMeScreen";
+import { AntDesign } from "@expo/vector-icons";
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -17,15 +25,22 @@ const Stack = createNativeStackNavigator();
 export default function App() {
   const [isLoading, setIsLoading] = useState(true);
   const [userToken, setUserToken] = useState(null);
+  const [userId, setUserId] = useState(null);
 
-  const setToken = async (token) => {
-    if (token) {
+  // const navigation = useNavigation();
+
+  const setToken = async (token, id) => {
+    console.log(id);
+    if (token && id) {
       await AsyncStorage.setItem("userToken", token);
+      await AsyncStorage.setItem("userId", id);
     } else {
       await AsyncStorage.removeItem("userToken");
+      await AsyncStorage.removeItem("userId");
     }
 
     setUserToken(token);
+    setUserId(id);
   };
 
   useEffect(() => {
@@ -34,10 +49,13 @@ export default function App() {
       // We should also handle error for production apps
       const userToken = await AsyncStorage.getItem("userToken");
 
+      const userId = await AsyncStorage.getItem("userId");
+
       // This will switch to the App screen or Auth screen and this loading
       // screen will be unmounted and thrown away.
       setUserToken(userToken);
 
+      setUserId(userId);
       setIsLoading(false);
     };
 
@@ -51,7 +69,7 @@ export default function App() {
 
   return (
     <NavigationContainer>
-      <Stack.Navigator>
+      <Stack.Navigator screenOptions={{ headerShown: false }}>
         {userToken === null ? (
           // No token found, user isn't signed in
           <>
@@ -83,14 +101,29 @@ export default function App() {
                   }}
                 >
                   {() => (
-                    <Stack.Navigator>
+                    <Stack.Navigator
+                      screenOptions={{
+                        headerTitle: () => (
+                          <Image
+                            style={styles.logo}
+                            source={require("./assets/logo.png")}
+                          />
+                        ),
+                      }}
+                    >
                       <Stack.Screen
                         name="Home"
-                        options={{
-                          title: "My App",
-                          headerStyle: { backgroundColor: "red" },
-                          headerTitleStyle: { color: "white" },
-                        }}
+                        // options={{
+                        //   headerShown: false,
+                        //   title: "",
+                        //   headerStyle: { backgroundColor: "red" },
+                        //   headerTitle: () => (
+                        //     <Image
+                        //       style={styles.logo}
+                        //       source={require("./assets/logo.png")}
+                        //     />
+                        //   ),
+                        // }}
                       >
                         {() => <HomeScreen />}
                       </Stack.Screen>
@@ -103,16 +136,45 @@ export default function App() {
                       >
                         {() => <ProfileScreen />}
                       </Stack.Screen>
+                      <Stack.Screen
+                        name="Room"
+                        // component={RoomScreen}
+                        // options={{
+                        //   title: "",
+                        //   headerBackground: () => (
+                        //     <Image
+                        //       style={styles.logo}
+                        //       source={require("./assets/logo.png")}
+                        //     />
+                        //   ),
+                        // }}
+
+                        // options={{
+                        //   headerLeft: () => (
+                        //     <AntDesign
+                        //       name="arrowleft"
+                        //       size={24}
+                        //       color="black"
+                        //       onPress={() => {
+                        //         navigation.goBack();
+                        //       }}
+                        //     />
+                        //   ),
+                        // }}
+                      >
+                        {(props) => <RoomScreen {...props} />}
+                        {/* {() => <RoomScreen />} */}
+                      </Stack.Screen>
                     </Stack.Navigator>
                   )}
                 </Tab.Screen>
                 <Tab.Screen
-                  name="TabSettings"
+                  name="TabAroundMe"
                   options={{
-                    tabBarLabel: "Settings",
+                    tabBarLabel: "Around Me",
                     tabBarIcon: ({ color, size }) => (
                       <Ionicons
-                        name={"ios-options"}
+                        name={"ios-location-outline"}
                         size={size}
                         color={color}
                       />
@@ -121,13 +183,75 @@ export default function App() {
                 >
                   {() => (
                     <Stack.Navigator>
+                      <Stack.Screen name="AroundMe" optin={{ title: "" }}>
+                        {() => <AroundMeScreen />}
+                      </Stack.Screen>
                       <Stack.Screen
-                        name="Settings"
+                        name="Room"
+                        // options={{
+                        //   title: "",
+                        //   headerBackground: () => (
+                        //     <Image
+                        //       style={styles.logo}
+                        //       source={require("./assets/logo.png")}
+                        //     />
+                        //   ),
+                        // }}
+                      >
+                        {(props) => <RoomScreen {...props} />}
+                        {/* {() => <RoomScreen />} */}
+                      </Stack.Screen>
+                    </Stack.Navigator>
+                  )}
+                </Tab.Screen>
+                <Tab.Screen
+                  // name="TabSettings"
+                  name="TabProfile"
+                  options={{
+                    // tabBarLabel: "Settings",
+                    tabBarLabel: "Profile",
+
+                    tabBarIcon: ({ color, size }) => (
+                      // <Ionicons
+                      //   name={"ios-options"}
+                      //   size={size}
+                      //   color={color}
+                      // />
+                      <MaterialCommunityIcons
+                        name="account-circle-outline"
+                        size={size}
+                        color={color}
+                      />
+                    ),
+                  }}
+                >
+                  {() => (
+                    <Stack.Navigator
+                      screenOptions={{
+                        headerTitle: () => (
+                          <Image
+                            style={styles.logo}
+                            source={require("./assets/logo.png")}
+                          />
+                        ),
+                      }}
+                    >
+                      <Stack.Screen
+                        // name="Settings"
+                        name="Profile"
                         options={{
-                          title: "Settings",
+                          // title: "Settings",
+                          title: "",
                         }}
                       >
-                        {() => <SettingsScreen setToken={setToken} />}
+                        {/* {() => <SettingsScreen setToken={setToken} />} */}
+                        {() => (
+                          <ProfileScreen
+                            setToken={setToken}
+                            token={userToken}
+                            userId={userId}
+                          />
+                        )}
                       </Stack.Screen>
                     </Stack.Navigator>
                   )}
@@ -140,3 +264,12 @@ export default function App() {
     </NavigationContainer>
   );
 }
+
+const styles = StyleSheet.create({
+  logo: {
+    height: 32,
+    width: 30,
+    // marginTop: 58,
+    // marginLeft: "47%",
+  },
+});

@@ -1,16 +1,11 @@
-import { Button, Text, View } from "react-native";
+import { useRoute } from "@react-navigation/core";
+import { Text, View } from "react-native";
 
-export default function SettingsScreen({ setToken }) {
+export default function SettingsScreen() {
+  const { params } = useRoute();
   return (
     <View>
-      <Text>Hello Settings</Text>
-
-      <Button
-        title="Log Out"
-        onPress={() => {
-          setToken(null);
-        }}
-      />
+      <Text>user id : {params.userId}</Text>
     </View>
   );
 }
